@@ -1,0 +1,86 @@
+[2026-03-14 22:58:23] Starting scheduled run
+22:58:23  INFO     Accounts: 31 active / 31 total
+22:58:24  INFO     ─── Market data ───────────────────────────────
+22:58:28  INFO     Market data: 27 / 27 assets fetched
+22:58:29  INFO     ─── FinTwit (Nitter RSS) ──────────────────────
+22:58:29  INFO     Fetching FinTwit for 31 active accounts…
+22:58:33  INFO       @RayDalio: 20 tweets
+22:58:35  INFO       @elerianm: 20 tweets
+22:58:38  INFO       @BillAckman: 20 tweets
+22:58:48  WARNING  All Nitter instances failed for @GundlachCapital
+22:58:48  INFO       @GundlachCapital: 0 tweets
+22:58:53  INFO       @MacroAlf: 20 tweets
+22:58:55  INFO       @LukeGromen: 20 tweets
+22:58:57  INFO       @RaoulGMI: 20 tweets
+22:58:59  INFO       @TaviCosta: 17 tweets
+22:59:01  INFO       @mark_dow: 20 tweets
+22:59:10  WARNING  All Nitter instances failed for @fleckenst
+22:59:10  INFO       @fleckenst: 0 tweets
+22:59:15  INFO       @JeffSnider_AIP: 2 tweets
+22:59:17  INFO       @michaellebowitz: 20 tweets
+22:59:19  INFO       @LizAnnSonders: 20 tweets
+22:59:27  WARNING  All Nitter instances failed for @hmeisler
+22:59:27  INFO       @hmeisler: 0 tweets
+22:59:32  INFO       @zerohedge: 20 tweets
+22:59:41  WARNING  All Nitter instances failed for @NorthmanTrader
+22:59:41  INFO       @NorthmanTrader: 0 tweets
+22:59:47  INFO       @hussmanjp: 20 tweets
+22:59:49  INFO       @jessefelder: 20 tweets
+22:59:51  INFO       @LynAldenContact: 20 tweets
+22:59:53  INFO       @saxena_puru: 17 tweets
+23:00:01  WARNING  All Nitter instances failed for @gametheoryMM
+23:00:01  INFO       @gametheoryMM: 0 tweets
+23:00:05  INFO       @PeterSchiff: 20 tweets
+23:00:14  WARNING  All Nitter instances failed for @StanChart_FX
+23:00:14  INFO       @StanChart_FX: 0 tweets
+23:00:19  INFO       @DavidSchawel: 7 tweets
+23:00:21  INFO       @ReformedBroker: 20 tweets
+23:00:23  INFO       @druckenmiller: 20 tweets
+23:00:25  INFO       @NDR_Research: 20 tweets
+23:00:27  INFO       @johnauthers: 20 tweets
+23:00:35  WARNING  All Nitter instances failed for @biancoresearch
+23:00:35  INFO       @biancoresearch: 0 tweets
+23:00:40  INFO       @ErikVoorhees: 20 tweets
+23:00:42  INFO       @APompliano: 20 tweets
+23:00:43  INFO     FinTwit total: 443 tweets
+23:00:43  INFO     ─── Reddit ─────────────────────────────────────
+23:00:44  INFO       r/investing: 25 posts
+23:00:48  INFO       r/stocks: 25 posts
+23:00:51  INFO       r/wallstreetbets: 25 posts
+23:00:54  INFO       r/Economics: 25 posts
+23:00:57  INFO       r/MacroEconomics: 25 posts
+23:01:00  INFO       r/SecurityAnalysis: 25 posts
+23:01:04  INFO       r/StockMarket: 25 posts
+23:01:07  INFO       r/GlobalMarkets: 25 posts
+23:01:10  INFO       r/worldnews: 25 posts
+23:01:14  INFO       r/finance: 25 posts
+23:01:16  INFO     Reddit total: 250 posts
+23:01:16  INFO     ─── News RSS ───────────────────────────────────
+23:01:16  INFO       Reuters Business: 0 articles
+23:01:16  INFO       Reuters Markets: 0 articles
+23:01:16  INFO       CNBC Markets: 20 articles
+23:01:17  INFO       CNBC Finance: 20 articles
+23:01:17  INFO       CNBC Economy: 0 articles
+23:01:18  INFO       MarketWatch Top: 10 articles
+23:01:20  INFO       MarketWatch Markets: 20 articles
+23:01:21  INFO       WSJ Markets: 20 articles
+23:01:21  INFO       Yahoo Finance: 20 articles
+23:01:22  INFO       Bloomberg Markets: 20 articles
+23:01:23  INFO       FT Markets: 12 articles
+23:01:23  INFO       Seeking Alpha: 7 articles
+23:01:24  INFO       Investopedia: 0 articles
+23:01:24  INFO       The Economist: 20 articles
+23:01:24  INFO     News total: 169 articles
+23:01:24  INFO     ─── Sentiment analysis (VADER) ────────────────────
+23:01:24  INFO     Scores — Overall: +0.080  |  FinTwit: +0.150  |  Reddit: +0.056  |  News: -0.069
+23:01:24  INFO     Saved run #5 to database.
+Traceback (most recent call last):
+  File "/Users/ju/Projects/global_macro_sentiment/run.py", line 263, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/ju/Projects/global_macro_sentiment/run.py", line 241, in main
+    from src.report import generate_report
+  File "/Users/ju/Projects/global_macro_sentiment/src/report.py", line 172
+    now = datetime.now(timezone.utc)
+                                    ^
+IndentationError: unindent does not match any outer indentation level

@@ -1,0 +1,26 @@
+# Global Macro Sentiment — Python dependencies
+#
+# Install with:  pip install -r requirements.txt
+#
+# Tested on Python 3.9+  (Python 3.11+ recommended)
+
+# ── Scraping ────────────────────────────────────────────────────────────────
+feedparser>=6.0.11          # RSS / Atom feed parser (Nitter, news)
+requests>=2.31.0            # HTTP client
+
+# ── Market data ─────────────────────────────────────────────────────────────
+yfinance>=0.2.38            # Yahoo Finance (free, no API key needed)
+
+# ── Sentiment analysis ───────────────────────────────────────────────────────
+vaderSentiment>=3.3.2       # Fast, social-media-tuned sentiment (default engine)
+
+# ── HTML parsing / utilities ────────────────────────────────────────────────
+lxml>=5.1.0                 # Fast XML/HTML parser (used by feedparser & bs4)
+beautifulsoup4>=4.12.0      # HTML cleanup (optional, good to have)
+
+# ────────────────────────────────────────────────────────────────────────────
+# OPTIONAL — FinBERT (better accuracy, ~420 MB model downloaded on first use)
+# Uncomment these two lines if you want to use  python run.py --use-finbert
+# ────────────────────────────────────────────────────────────────────────────
+# transformers>=4.40.0
+# torch>=2.2.0

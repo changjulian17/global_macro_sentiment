@@ -1,0 +1,203 @@
+{
+  "version": "1.0",
+  "accounts": [
+    {
+      "username": "RayDalio",
+      "name": "Ray Dalio",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "elerianm",
+      "name": "Mohamed El-Erian",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "BillAckman",
+      "name": "Bill Ackman",
+      "category": "hedge_fund",
+      "active": true
+    },
+    {
+      "username": "GundlachCapital",
+      "name": "Jeffrey Gundlach",
+      "category": "fixed_income",
+      "active": true
+    },
+    {
+      "username": "MacroAlf",
+      "name": "Alfonso Peccatiello",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "LukeGromen",
+      "name": "Luke Gromen",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "RaoulGMI",
+      "name": "Raoul Pal",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "TaviCosta",
+      "name": "Tavi Costa",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "mark_dow",
+      "name": "Mark Dow",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "fleckenst",
+      "name": "Stan Fleckenstein",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "JeffSnider_AIP",
+      "name": "Jeff Snider",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "michaellebowitz",
+      "name": "Michael Lebowitz",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "LizAnnSonders",
+      "name": "Liz Ann Sonders",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "hmeisler",
+      "name": "Helene Meisler",
+      "category": "technicals",
+      "active": true
+    },
+    {
+      "username": "zerohedge",
+      "name": "ZeroHedge",
+      "category": "news",
+      "active": true
+    },
+    {
+      "username": "NorthmanTrader",
+      "name": "Sven Henrich",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "hussmanjp",
+      "name": "John Hussman",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "jessefelder",
+      "name": "Jesse Felder",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "LynAldenContact",
+      "name": "Lyn Alden",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "saxena_puru",
+      "name": "Puru Saxena",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "gametheoryMM",
+      "name": "Game Theory MM",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "PeterSchiff",
+      "name": "Peter Schiff",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "StanChart_FX",
+      "name": "Steven Englander",
+      "category": "fx",
+      "active": true
+    },
+    {
+      "username": "DavidSchawel",
+      "name": "David Schawel",
+      "category": "fixed_income",
+      "active": true
+    },
+    {
+      "username": "ReformedBroker",
+      "name": "Josh Brown",
+      "category": "equities",
+      "active": true
+    },
+    {
+      "username": "druckenmiller",
+      "name": "Stan Druckenmiller",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "NDR_Research",
+      "name": "Ned Davis Research",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "johnauthers",
+      "name": "John Authers",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "biancoresearch",
+      "name": "Jim Bianco",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "kevinmuir",
+      "name": "Kevin Muir",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "hkuppy",
+      "name": "Harris Kupperman",
+      "category": "macro",
+      "active": true
+    },
+    {
+      "username": "ErikVoorhees",
+      "name": "Erik Voorhees",
+      "category": "crypto",
+      "active": true
+    },
+    {
+      "username": "APompliano",
+      "name": "Anthony Pompliano",
+      "category": "crypto",
+      "active": true
+    }
+  ]
+}
