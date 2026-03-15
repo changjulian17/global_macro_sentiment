@@ -275,21 +275,58 @@ This repo includes:
 4. In **Actions** tab, run workflow **Deploy Report to GitHub Pages** once.
 
 After the first successful run, your report is live at:
-- `https://<your-username>.github.io/<your-repo>/`
+- `https://changjulian17.github.io/global_macro_sentiment/`
 
 ### Automatic updates
 
 The workflow runs:
+- On every push to `main`
 - On manual trigger (`workflow_dispatch`)
 - Daily on schedule (`cron` in `.github/workflows/deploy-pages.yml`)
 
+FinTwit behavior in workflow:
+- Manual run: toggle `try_fintwit` input in Actions UI.
+- If enabled, workflow tries with FinTwit first and automatically falls back to
+	`--skip-fintwit` if Nitter/FinTwit fetch fails.
+
 No manual commit is required for each report update when using this workflow.
+
+### Keep local scheduler + auto commit/push after each run
+
+The macOS `launchd` scheduler now supports a publish mode that:
+1. Generates report + `docs/index.html`
+2. Commits updated docs files
+3. Pushes to `origin/main`
+
+Reinstall launchd job to ensure latest settings are loaded:
+
+```bash
+cd /Users/ju/Projects/global_macro_sentiment
+scripts/install_launchd.sh
+```
+
+If push auth fails in background runs, verify your git credential helper works
+outside terminal prompts (Keychain/credential manager).
+
+### GitHub-only mode (no local refresh dependency)
+
+If you want to rely only on GitHub Actions scheduled runs:
+
+```bash
+cd /Users/ju/Projects/global_macro_sentiment
+scripts/uninstall_launchd.sh
+```
+
+Then the Pages site updates from workflow schedule/manual/push only.
 
 ### Local dry run of publish script
 
 ```bash
 source .venv/bin/activate
 bash scripts/publish_pages.sh
+
+# Force skip FinTwit
+TRY_FINTWIT=false bash scripts/publish_pages.sh
 ```
 
 Output:

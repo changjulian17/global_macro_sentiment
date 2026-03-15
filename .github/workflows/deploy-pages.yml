@@ -1,9 +1,21 @@
 name: Deploy Report to GitHub Pages
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
+    inputs:
+      try_fintwit:
+        description: "Try FinTwit (auto-fallback to skip if unavailable)"
+        required: false
+        default: true
+        type: boolean
   schedule:
     - cron: "15 0 * * *"
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 permissions:
   contents: read
@@ -36,7 +48,7 @@ jobs:
       - name: Build report and stage Pages files
         run: bash scripts/publish_pages.sh
         env:
-          RUN_ARGS: --skip-fintwit --no-browser
+          TRY_FINTWIT: ${{ inputs.try_fintwit }}
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

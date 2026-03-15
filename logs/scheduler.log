@@ -84,3 +84,84 @@ Traceback (most recent call last):
     now = datetime.now(timezone.utc)
                                     ^
 IndentationError: unindent does not match any outer indentation level
+[2026-03-15 15:52:17] Starting scheduled run
+15:52:17  INFO     Accounts: 33 active / 33 total
+15:52:17  INFO     ─── Market data ───────────────────────────────
+15:52:24  INFO     Market data: 28 / 28 assets fetched
+15:52:29  INFO     ─── FinTwit (Nitter RSS) ──────────────────────
+15:52:29  INFO     Fetching FinTwit for 33 active accounts…
+15:52:30  INFO       @RayDalio: 21 tweets
+15:52:32  INFO       @elerianm: 20 tweets
+15:52:34  INFO       @BillAckman: 20 tweets
+15:52:43  WARNING  All Nitter instances failed for @GundlachCapital
+15:52:43  INFO       @GundlachCapital: 0 tweets
+15:52:45  INFO       @MacroAlf: 20 tweets
+15:52:47  INFO       @LukeGromen: 20 tweets
+15:52:49  INFO       @RaoulGMI: 20 tweets
+15:52:50  INFO       @TaviCosta: 17 tweets
+15:52:52  INFO       @mark_dow: 20 tweets
+15:53:01  WARNING  All Nitter instances failed for @fleckenst
+15:53:01  INFO       @fleckenst: 0 tweets
+15:53:03  INFO       @JeffSnider_AIP: 2 tweets
+15:53:05  INFO       @michaellebowitz: 20 tweets
+15:53:07  INFO       @LizAnnSonders: 20 tweets
+15:53:16  WARNING  All Nitter instances failed for @hmeisler
+15:53:16  INFO       @hmeisler: 0 tweets
+15:53:18  INFO       @zerohedge: 20 tweets
+15:53:26  WARNING  All Nitter instances failed for @NorthmanTrader
+15:53:26  INFO       @NorthmanTrader: 0 tweets
+15:53:28  INFO       @hussmanjp: 20 tweets
+15:53:31  INFO       @jessefelder: 20 tweets
+15:53:33  INFO       @LynAldenContact: 20 tweets
+15:53:35  INFO       @saxena_puru: 17 tweets
+15:53:43  WARNING  All Nitter instances failed for @gametheoryMM
+15:53:43  INFO       @gametheoryMM: 0 tweets
+15:53:45  INFO       @PeterSchiff: 20 tweets
+15:53:53  WARNING  All Nitter instances failed for @StanChart_FX
+15:53:53  INFO       @StanChart_FX: 0 tweets
+15:53:55  INFO       @DavidSchawel: 7 tweets
+15:53:57  INFO       @ReformedBroker: 20 tweets
+15:53:59  INFO       @druckenmiller: 20 tweets
+15:54:01  INFO       @NDR_Research: 20 tweets
+15:54:03  INFO       @johnauthers: 20 tweets
+15:54:05  INFO       @biancoresearch: 17 tweets
+15:54:07  INFO       @kevinmuir: 20 tweets
+15:54:09  INFO       @hkuppy: 18 tweets
+15:54:10  INFO       @ErikVoorhees: 20 tweets
+15:54:13  INFO       @APompliano: 19 tweets
+15:54:14  INFO     FinTwit total: 498 tweets
+15:54:14  INFO     ─── Reddit ─────────────────────────────────────
+15:54:15  INFO       r/investing: 25 posts
+15:54:19  INFO       r/stocks: 25 posts
+15:54:22  INFO       r/wallstreetbets: 25 posts
+15:54:25  INFO       r/Economics: 25 posts
+15:54:28  INFO       r/MacroEconomics: 25 posts
+15:54:32  INFO       r/SecurityAnalysis: 25 posts
+15:54:35  INFO       r/StockMarket: 25 posts
+15:54:38  INFO       r/GlobalMarkets: 25 posts
+15:54:42  INFO       r/worldnews: 25 posts
+15:54:45  INFO       r/finance: 25 posts
+15:54:47  INFO     Reddit total: 250 posts
+15:54:47  INFO     ─── News RSS ───────────────────────────────────
+15:54:47  INFO       Reuters Business: 0 articles
+15:54:47  INFO       Reuters Markets: 0 articles
+15:54:48  INFO       CNBC Markets: 20 articles
+15:54:48  INFO       CNBC Finance: 20 articles
+15:54:48  INFO       CNBC Economy: 0 articles
+15:54:50  INFO       MarketWatch Top: 10 articles
+15:54:51  INFO       MarketWatch Markets: 20 articles
+15:54:52  INFO       WSJ Markets: 20 articles
+15:54:52  INFO       Yahoo Finance: 20 articles
+15:54:54  INFO       Bloomberg Markets: 20 articles
+15:54:54  INFO       FT Markets: 9 articles
+15:54:55  INFO       Seeking Alpha: 7 articles
+15:54:56  INFO       Investopedia: 0 articles
+15:54:56  INFO       The Economist: 20 articles
+15:54:56  INFO     News total: 166 articles
+15:54:56  INFO     ─── Sentiment analysis (VADER) ────────────────────
+15:54:56  INFO     Scores — Overall: +0.069  |  FinTwit: +0.139  |  Reddit: +0.006  |  News: -0.045
+15:54:56  INFO     Saved run #25 to database.
+15:54:56  INFO     ─── Generating report ──────────────────────────
+15:54:56  INFO     Report saved → /Users/ju/Projects/global_macro_sentiment/reports/latest.html
+15:54:56  INFO     Done!  Report → /Users/ju/Projects/global_macro_sentiment/reports/latest.html
+[2026-03-15 15:54:56] Finished scheduled run

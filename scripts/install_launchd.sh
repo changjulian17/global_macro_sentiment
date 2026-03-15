@@ -27,6 +27,16 @@ cat > "$PLIST_PATH" <<EOF
   <key>WorkingDirectory</key>
   <string>$PROJECT_DIR</string>
 
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PUBLISH_AND_PUSH</key>
+    <string>true</string>
+    <key>TRY_FINTWIT</key>
+    <string>true</string>
+    <key>DEFAULT_BRANCH</key>
+    <string>main</string>
+  </dict>
+
   <key>StartCalendarInterval</key>
   <dict>
     <key>Hour</key>
@@ -57,4 +67,5 @@ launchctl enable "gui/$(id -u)/$LABEL"
 echo "Installed launchd job: $LABEL"
 echo "Plist: $PLIST_PATH"
 echo "Runs at login plus daily at 20:00 while your Mac is on and you are logged in."
+echo "Scheduler mode: generate pages, commit docs changes, and push to origin/main."
 echo "Logs: $PROJECT_DIR/logs/scheduler.log"
