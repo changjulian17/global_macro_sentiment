@@ -2,7 +2,7 @@
 
 Local batch pipeline for global macro sentiment using:
 - FinTwit (via public Nitter RSS, no X API key)
-- Reddit public JSON
+- Reddit JSON or OAuth API
 - News RSS feeds
 - Market data from Yahoo Finance (`yfinance`)
 
@@ -181,6 +181,20 @@ What to do:
 2. Update `NITTER_INSTANCES` in `src/scrapers/fintwit.py`.
 3. Retry later.
 
+### Reddit returns `403` in GitHub Actions
+
+Cause:
+- Reddit often blocks unauthenticated requests from datacenter IP ranges.
+
+What to do:
+1. Create a Reddit app at https://www.reddit.com/prefs/apps.
+2. Add GitHub repository secrets `REDDIT_CLIENT_ID` and `REDDIT_CLIENT_SECRET`.
+3. Re-run the Pages workflow.
+
+Notes:
+- The scraper uses OAuth automatically when those secrets are present.
+- Local runs can keep using public endpoints if they still work from your machine.
+
 ### Import errors
 
 ```bash
@@ -288,6 +302,13 @@ FinTwit behavior in workflow:
 - Manual run: toggle `try_fintwit` input in Actions UI.
 - If enabled, workflow tries with FinTwit first and automatically falls back to
 	`--skip-fintwit` if Nitter/FinTwit fetch fails.
+
+Reddit behavior in workflow:
+- GitHub-hosted runners may receive `403` from Reddit public endpoints.
+- To avoid that, add repository secrets `REDDIT_CLIENT_ID` and
+	`REDDIT_CLIENT_SECRET`.
+- Optional: add `REDDIT_USER_AGENT` if you want to override the default
+	User-Agent string.
 
 No manual commit is required for each report update when using this workflow.
 

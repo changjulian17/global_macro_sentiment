@@ -165,3 +165,95 @@ IndentationError: unindent does not match any outer indentation level
 15:54:56  INFO     Report saved → /Users/ju/Projects/global_macro_sentiment/reports/latest.html
 15:54:56  INFO     Done!  Report → /Users/ju/Projects/global_macro_sentiment/reports/latest.html
 [2026-03-15 15:54:56] Finished scheduled run
+[2026-03-15 20:14:27] Starting scheduled run
+error: cannot pull with rebase: You have unstaged changes.
+error: please commit or stash them.
+Attempting build with FinTwit enabled...
+20:14:27  INFO     Accounts: 33 active / 33 total
+20:14:28  INFO     ─── Market data ───────────────────────────────
+20:19:53  INFO     Market data: 27 / 28 assets fetched
+20:20:00  INFO     ─── FinTwit (Nitter RSS) ──────────────────────
+20:20:00  INFO     Fetching FinTwit for 33 active accounts…
+20:20:01  INFO       @RayDalio: 20 tweets
+20:20:03  INFO       @elerianm: 20 tweets
+20:20:05  INFO       @BillAckman: 20 tweets
+20:20:16  WARNING  All Nitter instances failed for @GundlachCapital
+20:20:16  INFO       @GundlachCapital: 0 tweets
+20:20:18  INFO       @MacroAlf: 20 tweets
+20:20:21  INFO       @LukeGromen: 20 tweets
+20:20:23  INFO       @RaoulGMI: 20 tweets
+20:20:25  INFO       @TaviCosta: 17 tweets
+20:20:28  INFO       @mark_dow: 20 tweets
+20:20:39  WARNING  All Nitter instances failed for @fleckenst
+20:20:39  INFO       @fleckenst: 0 tweets
+20:20:42  INFO       @JeffSnider_AIP: 2 tweets
+20:20:45  INFO       @michaellebowitz: 20 tweets
+20:20:47  INFO       @LizAnnSonders: 20 tweets
+20:20:57  WARNING  All Nitter instances failed for @hmeisler
+20:20:57  INFO       @hmeisler: 0 tweets
+20:20:59  INFO       @zerohedge: 20 tweets
+20:21:09  WARNING  All Nitter instances failed for @NorthmanTrader
+20:21:09  INFO       @NorthmanTrader: 0 tweets
+20:21:19  WARNING  All Nitter instances failed for @hussmanjp
+20:21:19  INFO       @hussmanjp: 0 tweets
+20:21:21  INFO       @jessefelder: 20 tweets
+20:21:23  INFO       @LynAldenContact: 20 tweets
+20:21:26  INFO       @saxena_puru: 17 tweets
+20:21:36  WARNING  All Nitter instances failed for @gametheoryMM
+20:21:36  INFO       @gametheoryMM: 0 tweets
+20:21:39  INFO       @PeterSchiff: 20 tweets
+20:21:49  WARNING  All Nitter instances failed for @StanChart_FX
+20:21:49  INFO       @StanChart_FX: 0 tweets
+20:21:52  INFO       @DavidSchawel: 7 tweets
+20:21:55  INFO       @ReformedBroker: 20 tweets
+20:21:57  INFO       @druckenmiller: 20 tweets
+20:22:00  INFO       @NDR_Research: 20 tweets
+20:22:09  WARNING  All Nitter instances failed for @johnauthers
+20:22:09  INFO       @johnauthers: 0 tweets
+20:22:11  INFO       @biancoresearch: 17 tweets
+20:22:21  WARNING  All Nitter instances failed for @kevinmuir
+20:22:21  INFO       @kevinmuir: 0 tweets
+20:22:24  INFO       @hkuppy: 18 tweets
+20:22:26  INFO       @ErikVoorhees: 20 tweets
+20:22:28  INFO       @APompliano: 19 tweets
+20:22:29  INFO     FinTwit total: 437 tweets
+20:22:29  INFO     ─── Reddit ─────────────────────────────────────
+20:22:31  INFO       r/investing: 25 posts
+20:22:35  INFO       r/stocks: 25 posts
+20:22:38  INFO       r/wallstreetbets: 25 posts
+20:22:42  INFO       r/Economics: 25 posts
+20:22:45  INFO       r/MacroEconomics: 25 posts
+20:22:49  INFO       r/SecurityAnalysis: 25 posts
+20:22:52  INFO       r/StockMarket: 25 posts
+20:22:55  INFO       r/GlobalMarkets: 25 posts
+20:22:59  INFO       r/worldnews: 25 posts
+20:23:02  INFO       r/finance: 25 posts
+20:23:04  INFO     Reddit total: 250 posts
+20:23:04  INFO     ─── News RSS ───────────────────────────────────
+20:23:05  INFO       Reuters Business: 0 articles
+20:23:05  INFO       Reuters Markets: 0 articles
+20:23:05  INFO       CNBC Markets: 20 articles
+20:23:06  INFO       CNBC Finance: 20 articles
+20:23:06  INFO       CNBC Economy: 0 articles
+20:23:09  INFO       MarketWatch Top: 10 articles
+20:23:10  INFO       MarketWatch Markets: 20 articles
+20:23:11  INFO       WSJ Markets: 20 articles
+20:23:12  INFO       Yahoo Finance: 20 articles
+20:23:13  INFO       Bloomberg Markets: 20 articles
+20:23:15  INFO       FT Markets: 10 articles
+20:23:16  INFO       Seeking Alpha: 7 articles
+20:23:17  INFO       Investopedia: 0 articles
+20:23:17  INFO       The Economist: 20 articles
+20:23:17  INFO     News total: 167 articles
+20:23:17  INFO     ─── Sentiment analysis (VADER) ────────────────────
+20:23:17  INFO     Scores — Overall: +0.053  |  FinTwit: +0.127  |  Reddit: +0.005  |  News: -0.067
+20:23:17  INFO     Saved run #26 to database.
+20:23:17  INFO     ─── Generating report ──────────────────────────
+20:23:18  INFO     Report saved → /Users/ju/Projects/global_macro_sentiment/reports/latest.html
+20:23:18  INFO     Done!  Report → /Users/ju/Projects/global_macro_sentiment/reports/latest.html
+Pages artifact ready at: /Users/ju/Projects/global_macro_sentiment/docs/index.html
+[main 3a7775c] chore: update pages report 2026-03-15 12:23 UTC
+ 2 files changed, 43 insertions(+), 40 deletions(-)
+To https://github.com/changjulian17/global_macro_sentiment.git
+   6441809..3a7775c  main -> main
+[2026-03-15 20:23:19] Finished scheduled run

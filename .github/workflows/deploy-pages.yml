@@ -49,6 +49,9 @@ jobs:
         run: bash scripts/publish_pages.sh
         env:
           TRY_FINTWIT: ${{ inputs.try_fintwit }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
