@@ -273,8 +273,9 @@ def generate_report(
 
     all_posts = fintwit_posts + reddit_posts + news_posts
 
-    # History chart datasets (oldest → newest)
-    hist_labels  = [h["run_time"][:16].replace("T", " ")  for h in history]
+    # History chart datasets (oldest -> newest)
+    # Keep raw UTC timestamps so the browser can render them in local time.
+    hist_run_times = [h.get("run_time", "") for h in history]
     hist_overall = [round(h.get("overall_score", 0) or 0, 4) for h in history]
     hist_ft      = [round(h.get("fintwit_score", 0) or 0, 4) for h in history]
     hist_rd      = [round(h.get("reddit_score",  0) or 0, 4) for h in history]
@@ -482,10 +483,24 @@ def generate_report(
 (function() {{
   const ctx = document.getElementById('histChart');
   if (!ctx) return;
+  const histRunTimes = {json.dumps(hist_run_times)};
+  const parseUtcTimestamp = (value) => {{
+    if (!value) return null;
+    const hasTz = /Z$|[+\-]\d\d:\d\d$/.test(value);
+    const normalized = hasTz ? value : `${{value.replace(' ', 'T')}}Z`;
+    const dt = new Date(normalized);
+    return Number.isNaN(dt.getTime()) ? null : dt;
+  }};
+  const dateFmt = new Intl.DateTimeFormat(undefined, {{
+    year: '2-digit', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  }});
+  const histDates = histRunTimes.map(parseUtcTimestamp);
+  const histLabels = histDates.map((dt, idx) => dt ? dateFmt.format(dt) : (histRunTimes[idx] || ''));
   new Chart(ctx, {{
     type: 'line',
     data: {{
-      labels: {json.dumps(hist_labels)},
+      labels: histLabels,
       datasets: [
         {{
           label: 'Overall',
@@ -516,7 +531,18 @@ def generate_report(
       interaction: {{ mode: 'index', intersect: false }},
       plugins: {{
         legend: {{ labels: {{ color: '#c9d1d9', font: {{ size: 12 }} }} }},
-        tooltip: {{ backgroundColor: '#161b22', borderColor: '#30363d', borderWidth: 1 }}
+        tooltip: {{
+          backgroundColor: '#161b22',
+          borderColor: '#30363d',
+          borderWidth: 1,
+          callbacks: {{
+            title: (items) => {{
+              const idx = items && items.length ? items[0].dataIndex : -1;
+              const dt = idx >= 0 ? histDates[idx] : null;
+              return dt ? dt.toLocaleString() : (items && items.length ? items[0].label : '');
+            }}
+          }}
+        }}
       }},
       scales: {{
         x: {{

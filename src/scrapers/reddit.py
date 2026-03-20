@@ -55,6 +55,14 @@ def _oauth_credentials() -> tuple[str, str] | None:
     return None
 
 
+def _running_in_github_actions() -> bool:
+    return os.getenv("GITHUB_ACTIONS", "").strip().lower() == "true"
+
+
+def _skip_reddit_enabled() -> bool:
+    return os.getenv("SKIP_REDDIT", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _get_oauth_token(session: requests.Session) -> str | None:
     global _OAUTH_TOKEN, _OAUTH_TOKEN_EXPIRES_AT
 
@@ -188,6 +196,17 @@ def fetch_subreddit(subreddit: str, limit: int = 25) -> list:
 
 
 def fetch_all() -> list:
+    if _skip_reddit_enabled():
+        logger.info("Skipping Reddit because SKIP_REDDIT is enabled.")
+        return []
+
+    if _running_in_github_actions() and _oauth_credentials() is None:
+        logger.warning(
+            "Skipping Reddit in GitHub Actions because REDDIT_CLIENT_ID and "
+            "REDDIT_CLIENT_SECRET are not set."
+        )
+        return []
+
     all_posts: list = []
     for subreddit in SUBREDDITS:
         posts = fetch_subreddit(subreddit)

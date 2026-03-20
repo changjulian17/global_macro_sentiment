@@ -193,6 +193,8 @@ What to do:
 
 Notes:
 - The scraper uses OAuth automatically when those secrets are present.
+- In GitHub Actions, if the secrets are missing, Reddit scraping is skipped
+	with a single warning (instead of repeated 403 logs).
 - Local runs can keep using public endpoints if they still work from your machine.
 
 ### Import errors
@@ -309,6 +311,8 @@ Reddit behavior in workflow:
 	`REDDIT_CLIENT_SECRET`.
 - Optional: add `REDDIT_USER_AGENT` if you want to override the default
 	User-Agent string.
+- If Reddit secrets are not set, the workflow skips Reddit scraping and still
+	builds/deploys the report.
 
 No manual commit is required for each report update when using this workflow.
 

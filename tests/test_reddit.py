@@ -94,6 +94,24 @@ class TestRedditScraper(unittest.TestCase):
         joined = "\n".join(str(call.args[0]) for call in warn.call_args_list)
         self.assertIn("GitHub Actions", joined)
 
+    def test_fetch_all_skips_in_github_actions_without_credentials(self):
+        with patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=True):
+            with patch.object(reddit.logger, "warning") as warn:
+                posts = reddit.fetch_all()
+
+        self.assertEqual([], posts)
+        joined = "\n".join(str(call.args[0]) for call in warn.call_args_list)
+        self.assertIn("Skipping Reddit in GitHub Actions", joined)
+
+    def test_fetch_all_skips_when_skip_reddit_env_enabled(self):
+        with patch.dict(os.environ, {"SKIP_REDDIT": "true"}, clear=True):
+            with patch.object(reddit.logger, "info") as info:
+                posts = reddit.fetch_all()
+
+        self.assertEqual([], posts)
+        joined = "\n".join(str(call.args[0]) for call in info.call_args_list)
+        self.assertIn("SKIP_REDDIT", joined)
+
 
 if __name__ == "__main__":
     unittest.main()
