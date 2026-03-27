@@ -1,0 +1,15 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Local virtual environment
+.venv/
+
+# Local runtime artifacts
+data/sentiment.db
+logs/*.log
+reports/latest.html
+
+# Local editor files
+.vscode/c_cpp_properties.json
+.vscode/launch.json

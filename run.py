@@ -175,6 +175,7 @@ Examples
     # ------------------------------------------------------------------
     from src.scrapers.market import fetch_market_data, fetch_fear_greed
     from src.scrapers.liquidity import fetch_global_liquidity
+    from src.scrapers.indicators import fetch_indicators
     from src.scrapers.reddit import fetch_all as fetch_reddit
     from src.scrapers.news   import fetch_all as fetch_news
 
@@ -182,6 +183,7 @@ Examples
     market_data = fetch_market_data()
     fear_greed  = fetch_fear_greed()
     liquidity   = fetch_global_liquidity()
+    indicators  = fetch_indicators()
 
     ft_raw: list = []
     if not args.skip_fintwit:
@@ -250,6 +252,7 @@ Examples
         market_data   = market_data,
         fear_greed    = fear_greed,
         liquidity     = liquidity,
+        indicators    = indicators,
         fintwit_posts = ft_posts,
         reddit_posts  = rd_posts,
         news_posts    = nw_posts,

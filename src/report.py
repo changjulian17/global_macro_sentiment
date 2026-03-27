@@ -199,6 +199,36 @@ def _source_card(title: str, agg: dict) -> str:
     )
 
 
+def _indicator_card(label: str, value: float, unit: str = "") -> str:
+    """Render a single macro indicator in a box."""
+    # Determine color based on value (for rates/yields: neutral, for indices: varies)
+    if unit == "yield_pct":
+        # For yields: no strong color coding, keep neutral
+        color = "#8b949e"
+    elif unit == "index":
+        # For indices like DXY and MOVE: no strong color coding
+        color = "#8b949e"
+    else:
+        color = "#8b949e"
+    
+    if isinstance(value, (int, float)):
+        if unit == "yield_pct":
+            value_str = f"{value:.3f}%"
+        elif unit == "index":
+            value_str = f"{value:,.2f}"
+        else:
+            value_str = f"{value:,.2f}"
+    else:
+        value_str = str(value)
+    
+    return (
+        f'<div class="card" style="min-height: 120px; display: flex; flex-direction: column; justify-content: center;">'
+        f'<h2>{label}</h2>'
+        f'<div class="big-num" style="color:{color}">{value_str}</div>'
+        f"</div>"
+    )
+
+
 def _fg_card(title: str, fg: dict) -> str:
     val   = fg.get("value", "N/A")
     lbl   = fg.get("label", "Unknown")
@@ -249,6 +279,7 @@ def generate_report(
     market_data: dict,
     fear_greed:  dict,
     liquidity:   dict,
+    indicators:  dict,
     fintwit_posts: list,
     reddit_posts:  list,
     news_posts:    list,
@@ -294,6 +325,20 @@ def generate_report(
     else:
         _y_min = -0.5
         _y_max = 0.5
+
+    # Build indicators HTML section
+    indicators_html = ""
+    if indicators:
+        ind_cards = []
+        if indicators.get("dxy"):
+            ind_cards.append(_indicator_card("US Dollar Index", indicators["dxy"].get("value", 0), "index"))
+        if indicators.get("us10y"):
+            ind_cards.append(_indicator_card("US 10Y Yield", indicators["us10y"].get("value", 0), "yield_pct"))
+        if indicators.get("move"):
+            ind_cards.append(_indicator_card("MOVE Index", indicators["move"].get("value", 0), "index"))
+        
+        if ind_cards:
+            indicators_html = f'<div class="grid-3" style="margin-top:-2px">\n    ' + '\n    '.join(ind_cards) + '\n  </div>\n'
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -411,11 +456,15 @@ def generate_report(
     {_fg_card("Fear &amp; Greed — Equities (CNN)", fear_greed.get("equity_fg", {}))}
   </div>
 
+  <!-- Row 2: Macro Indicators -->
+  {indicators_html}
+
+  <!-- Row 3: Liquidity -->
   <div class="grid-3" style="margin-top:-2px">
     {_liq_card("Global Liquidity (Fed+ECB+BoJ, USD-adjusted)", liquidity)}
   </div>
 
-  <!-- Row 2: Source breakdown -->
+  <!-- Row 4: Source breakdown -->
   <div class="grid-3">
     {_source_card("FinTwit Sentiment", ft_agg)}
     {_source_card("Reddit Sentiment", rd_agg)}
