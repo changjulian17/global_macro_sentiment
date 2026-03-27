@@ -22,19 +22,31 @@ cd "$PROJECT_DIR"
 
 # Keep local scheduler branch aligned before generating a new publish commit.
 if [[ "$PUBLISH_AND_PUSH" == "true" ]]; then
-  git pull --rebase origin "$DEFAULT_BRANCH" >> "$LOG_DIR/scheduler.log" 2>&1 || true
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    if [[ -n "$(git status --porcelain --untracked-files=no 2>/dev/null)" ]]; then
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] Skipping git pull --rebase: worktree not clean" >> "$LOG_DIR/scheduler.log"
+    else
+      git pull --rebase origin "$DEFAULT_BRANCH" >> "$LOG_DIR/scheduler.log" 2>&1 || true
+    fi
+  else
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Skipping git pull --rebase: not a git worktree" >> "$LOG_DIR/scheduler.log"
+  fi
 fi
 
 if [[ "$PUBLISH_AND_PUSH" == "true" ]]; then
   TRY_FINTWIT="$TRY_FINTWIT" bash "$PROJECT_DIR/scripts/publish_pages.sh" >> "$LOG_DIR/scheduler.log" 2>&1
 
-  git add docs/index.html docs/build-info.txt docs/.nojekyll >> "$LOG_DIR/scheduler.log" 2>&1 || true
-  if git diff --cached --quiet; then
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] No docs changes to commit" >> "$LOG_DIR/scheduler.log"
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    git add docs/index.html docs/build-info.txt docs/.nojekyll >> "$LOG_DIR/scheduler.log" 2>&1 || true
+    if git diff --cached --quiet; then
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] No docs changes to commit" >> "$LOG_DIR/scheduler.log"
+    else
+      COMMIT_MSG="chore: update pages report $(date -u '+%Y-%m-%d %H:%M UTC')"
+      git commit -m "$COMMIT_MSG" >> "$LOG_DIR/scheduler.log" 2>&1 || true
+      git push origin "$DEFAULT_BRANCH" >> "$LOG_DIR/scheduler.log" 2>&1 || true
+    fi
   else
-    COMMIT_MSG="chore: update pages report $(date -u '+%Y-%m-%d %H:%M UTC')"
-    git commit -m "$COMMIT_MSG" >> "$LOG_DIR/scheduler.log" 2>&1 || true
-    git push origin "$DEFAULT_BRANCH" >> "$LOG_DIR/scheduler.log" 2>&1 || true
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Skipping commit/push: not a git worktree" >> "$LOG_DIR/scheduler.log"
   fi
 else
   # --no-browser is essential for background launchd runs.

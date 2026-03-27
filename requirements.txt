@@ -10,6 +10,7 @@ requests>=2.31.0            # HTTP client
 
 # ── Market data ─────────────────────────────────────────────────────────────
 yfinance>=0.2.38            # Yahoo Finance (free, no API key needed)
+pyfedwatch>=0.0.3           # FedWatch probabilities from Fed Funds futures
 
 # ── Sentiment analysis ───────────────────────────────────────────────────────
 vaderSentiment>=3.3.2       # Fast, social-media-tuned sentiment (default engine)
