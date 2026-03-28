@@ -157,6 +157,83 @@ def _extract_fedwatch_rows(df: pd.DataFrame, max_rows: int = 3) -> list[dict]:
     return rows
 
 
+def _fetch_zq_implied_rate() -> Optional[float]:
+    """Fetch front-month Fed Funds futures implied rate from Yahoo (ZQ=F)."""
+    try:
+        price = _download_close("ZQ=F", period="10d")
+        if price is None:
+            return None
+        implied = 100.0 - float(price)
+        if implied < 0 or implied > 20:
+            return None
+        return implied
+    except Exception as exc:
+        logger.debug("FedWatch fallback: could not fetch ZQ=F: %s", exc)
+        return None
+
+
+def _build_simple_fedwatch_fallback(watch_date: str) -> Optional[dict]:
+    """Build a simple cut/hold/hike probability fallback from free inputs.
+
+    This is a heuristic estimate from front-month Fed Funds futures implied rate
+    versus latest effective Fed Funds rate (EFFR).
+    """
+    implied_rate = _fetch_zq_implied_rate()
+    if implied_rate is None:
+        return None
+
+    # Prefer the policy target band midpoint (FedWatch convention) over EFFR.
+    target_low = _fetch_fred_latest("DFEDTARL")
+    target_high = _fetch_fred_latest("DFEDTARU")
+
+    if target_low is not None and target_high is not None:
+        base_rate = (float(target_low) + float(target_high)) / 2.0
+        base_label = "target_midpoint"
+    else:
+        effr = _fetch_fred_latest("DFF")
+        if effr is None:
+            return None
+        base_rate = float(effr)
+        base_label = "effr"
+
+    delta = float(implied_rate) - base_rate
+    step = 0.25
+
+    if delta >= 0:
+        hike_prob = min(100.0, max(0.0, (delta / step) * 100.0))
+        cut_prob = 0.0
+    else:
+        hike_prob = 0.0
+        cut_prob = min(100.0, max(0.0, (-delta / step) * 100.0))
+
+    hold_prob = max(0.0, 100.0 - hike_prob - cut_prob)
+
+    return {
+        "label": "FedWatch Target Rate Probabilities",
+        "source": "zq_effr_heuristic",
+        "watch_date": watch_date,
+        "meetings": [
+            {
+                "meeting": "Next FOMC (heuristic)",
+                "probabilities": {
+                    "Cut": round(cut_prob, 2),
+                    "Hold": round(hold_prob, 2),
+                    "Hike": round(hike_prob, 2),
+                },
+            }
+        ],
+        "reference": {
+            "zq_implied_rate": round(float(implied_rate), 3),
+            "base_rate": round(float(base_rate), 3),
+            "base_rate_kind": base_label,
+            "target_low": round(float(target_low), 3) if target_low is not None else None,
+            "target_high": round(float(target_high), 3) if target_high is not None else None,
+            "delta_pct": round(delta, 3),
+        },
+        "value_unit": "probability_pct",
+    }
+
+
 def _fetch_dxy() -> Optional[dict]:
     """Fetch current DXY (US Dollar Index) from yfinance."""
     for symbol in ("DX-Y.NYB", "^DXY", "DX=F"):
@@ -248,13 +325,14 @@ def _fetch_move_index() -> Optional[dict]:
 
 def _fetch_fedwatch_rates() -> Optional[dict]:
     """Fetch FedWatch probabilities using pyfedwatch with robust fallbacks."""
+    watch_date = _get_watch_date_utc()
+
     try:
         import pyfedwatch as fw
     except Exception as exc:
         logger.debug("FedWatch unavailable (pyfedwatch import failed): %s", exc)
-        return None
+        return _build_simple_fedwatch_fallback(watch_date)
 
-    watch_date = _get_watch_date_utc()
     try:
         fomc_df = None
         for getter_name in ("get_fomc_data", "get_fomc_data_fed"):
@@ -271,14 +349,14 @@ def _fetch_fedwatch_rates() -> Optional[dict]:
 
         if fomc_df is None or fomc_df.empty:
             logger.warning("FedWatch: could not load FOMC calendar")
-            return None
+            return _build_simple_fedwatch_fallback(watch_date)
 
         today = datetime.now(timezone.utc).date()
         fomc_dates = pd.to_datetime(fomc_df.index, errors="coerce")
         future_dates = [d.to_pydatetime() for d in fomc_dates if not pd.isna(d) and d.date() >= today]
         if not future_dates:
             logger.warning("FedWatch: no future FOMC dates found")
-            return None
+            return _build_simple_fedwatch_fallback(watch_date)
 
         num_upcoming = min(3, len(future_dates))
         calc = fw.fedwatch.FedWatch(
@@ -292,7 +370,7 @@ def _fetch_fedwatch_rates() -> Optional[dict]:
         meetings = _extract_fedwatch_rows(table, max_rows=num_upcoming)
         if not meetings:
             logger.warning("FedWatch: empty probabilities table")
-            return None
+            return _build_simple_fedwatch_fallback(watch_date)
 
         return {
             "label": "FedWatch Target Rate Probabilities",
@@ -303,7 +381,7 @@ def _fetch_fedwatch_rates() -> Optional[dict]:
         }
     except Exception as exc:
         logger.warning("FedWatch fetch failed: %s", exc)
-        return None
+        return _build_simple_fedwatch_fallback(watch_date)
 
 
 def fetch_indicators() -> dict:

@@ -229,6 +229,52 @@ def _indicator_card(label: str, value: float, unit: str = "") -> str:
     )
 
 
+def _fedwatch_card(fedwatch: dict) -> str:
+    """Render Fed probabilities table (top 3 buckets per meeting)."""
+    meetings = fedwatch.get("meetings", []) if isinstance(fedwatch, dict) else []
+    if not meetings:
+        return ""
+
+    source = str(fedwatch.get("source", "unknown"))
+    watch_date = str(fedwatch.get("watch_date", ""))
+
+    rows: list[str] = []
+    for item in meetings[:3]:
+        if not isinstance(item, dict):
+            continue
+        meeting = str(item.get("meeting", "Upcoming meeting"))
+        probs = item.get("probabilities", {})
+        if not isinstance(probs, dict) or not probs:
+            continue
+
+        top_probs = sorted(
+            ((str(k), float(v)) for k, v in probs.items() if isinstance(v, (int, float))),
+            key=lambda x: x[1],
+            reverse=True,
+        )[:3]
+        if not top_probs:
+            continue
+
+        prob_html = " · ".join([f"{k}: {v:.1f}%" for k, v in top_probs])
+        rows.append(
+            f'<tr><td>{meeting}</td><td class="num">{prob_html}</td></tr>'
+        )
+
+    if not rows:
+        return ""
+
+    return (
+        '<div class="section" style="margin-top:14px">'
+        '<h2>Fed Policy Probabilities (Fed Funds Futures)</h2>'
+        '<table>'
+        '<thead><tr><th>Meeting</th><th style="text-align:right">Top Probabilities</th></tr></thead>'
+        f"<tbody>{''.join(rows)}</tbody>"
+        '</table>'
+        f'<div class="muted" style="margin-top:8px">Source: {source} | Watch date: {watch_date}</div>'
+        '</div>'
+    )
+
+
 def _fg_card(title: str, fg: dict) -> str:
     val   = fg.get("value", "N/A")
     lbl   = fg.get("label", "Unknown")
@@ -339,6 +385,9 @@ def generate_report(
         
         if ind_cards:
             indicators_html = f'<div class="grid-3" style="margin-top:-2px">\n    ' + '\n    '.join(ind_cards) + '\n  </div>\n'
+
+        if indicators.get("fedwatch"):
+          indicators_html += _fedwatch_card(indicators.get("fedwatch", {}))
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
