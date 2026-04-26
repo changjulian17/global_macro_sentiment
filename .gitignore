@@ -7,6 +7,7 @@ __pycache__/
 
 # Local runtime artifacts
 data/sentiment.db
+!data/sentiment.db
 logs/*.log
 reports/latest.html
 
