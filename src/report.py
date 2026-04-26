@@ -483,6 +483,14 @@ def generate_report(
   <header>
     <h1>🌐 Global Macro Sentiment</h1>
     <span class="ts">Generated {ts}</span>
+    <div style="margin-top:0.9rem;">
+      <a href="https://github.com/changjulian17/global_macro_sentiment/actions/workflows/deploy-pages.yml"
+         target="_blank" rel="noopener"
+         style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.55rem 1.1rem;border-radius:8px;font-size:0.85rem;font-weight:500;text-decoration:none;transition:all 0.2s;background:#3fb95022;color:#3fb950;border:1px solid #3fb95055;cursor:pointer;">
+        ▶ Run Pipeline
+        <span style="opacity:0.65;font-size:0.75rem;">Actions ↗</span>
+      </a>
+    </div>
   </header>
 
   <!-- Row 1: Overall + F&G -->
