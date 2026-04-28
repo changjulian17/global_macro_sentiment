@@ -112,8 +112,15 @@ def _market_rows(market_data: dict) -> str:
             pct_cells.append((ticker, key, val))
 
     max_abs_pct = max([abs(v) for _, _, v in pct_cells], default=1.0)
-    top5 = {(t, k) for t, k, _ in sorted(pct_cells, key=lambda x: x[2], reverse=True)[:5]}
-    bot5 = {(t, k) for t, k, _ in sorted(pct_cells, key=lambda x: x[2])[:5]}
+
+    # Compute TOP5/BOT5 per timeframe column, not globally
+    col_keys = ("change_1d", "change_5d", "change_1mo")
+    top5 = set()
+    bot5 = set()
+    for col in col_keys:
+        col_vals = [(t, k, v) for t, k, v in pct_cells if k == col]
+        top5 |= {(t, k) for t, k, _ in sorted(col_vals, key=lambda x: x[2], reverse=True)[:5]}
+        bot5 |= {(t, k) for t, k, _ in sorted(col_vals, key=lambda x: x[2])[:5]}
 
     for cat in _CAT_ORDER:
         assets = [a for a in market_data.values() if a.get("category") == cat]
