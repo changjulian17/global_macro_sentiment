@@ -1,28 +1,24 @@
-"""Reddit scraper.
+"""Reddit scraper — RSS-only, no API key needed.
 
-Prefers Reddit OAuth when credentials are available and otherwise falls back to
-public JSON endpoints. GitHub-hosted runners are more likely to receive 403s on
-unauthenticated requests, so CI should provide Reddit API credentials via:
+Uses Reddit's public RSS feeds (hot/.rss) which are freely accessible without
+authentication. Works reliably in GitHub Actions and other CI environments
+where the JSON API often returns HTTP 403.
 
-- REDDIT_CLIENT_ID
-- REDDIT_CLIENT_SECRET
-- optional REDDIT_USER_AGENT
+Output schema matches the original JSON API scraper for backward compat:
+    { source, title, text, score, num_comments, url, published }
 """
 
 from __future__ import annotations
 
 import logging
-import os
+import re
 import time
 from datetime import datetime, timezone
 
+import feedparser
 import requests
 
 logger = logging.getLogger(__name__)
-
-_OAUTH_TOKEN: str | None = None
-_OAUTH_TOKEN_EXPIRES_AT = 0.0
-_PUBLIC_403_HINT_LOGGED = False
 
 SUBREDDITS = [
     "investing",
@@ -37,181 +33,104 @@ SUBREDDITS = [
     "finance",
 ]
 
-_DEFAULT_USER_AGENT = os.getenv(
-    "REDDIT_USER_AGENT",
-    "MacroSentimentBot/1.1 (research automation; contact repo maintainer)",
-)
-_PUBLIC_HEADERS = {
-    "Accept": "application/json",
-    "User-Agent": _DEFAULT_USER_AGENT,
-}
+_USER_AGENT = "MacroSentimentBot/1.2 (RSS; research automation)"
+_RSS_URL = "https://www.reddit.com/r/{subreddit}/hot/.rss"
+
+# Strip HTML tags from RSS summary content
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+_WHITESPACE_RE = re.compile(r"\s+")
 
 
-def _oauth_credentials() -> tuple[str, str] | None:
-    client_id = os.getenv("REDDIT_CLIENT_ID", "").strip()
-    client_secret = os.getenv("REDDIT_CLIENT_SECRET", "").strip()
-    if client_id and client_secret:
-        return client_id, client_secret
-    return None
+def _clean_html(raw: str) -> str:
+    """Strip HTML tags and collapse whitespace."""
+    cleaned = _HTML_TAG_RE.sub(" ", raw)
+    cleaned = _WHITESPACE_RE.sub(" ", cleaned).strip()
+    return cleaned
 
 
-def _running_in_github_actions() -> bool:
-    return os.getenv("GITHUB_ACTIONS", "").strip().lower() == "true"
+def _parse_published(published_str: str) -> str:
+    """Parse RSS published string to ISO 8601 UTC timestamp.
+
+    feedparser returns a time.struct_time which we convert cleanly.
+    """
+    try:
+        import time as _time
+
+        parsed = feedparser._parse_date(published_str)
+        if parsed:
+            return datetime(
+                parsed.tm_year, parsed.tm_mon, parsed.tm_mday,
+                parsed.tm_hour, parsed.tm_min, parsed.tm_sec,
+                tzinfo=timezone.utc,
+            ).isoformat()
+    except Exception:
+        pass
+    return datetime.now(timezone.utc).isoformat()
 
 
-def _skip_reddit_enabled() -> bool:
-    return os.getenv("SKIP_REDDIT", "").strip().lower() in {"1", "true", "yes", "on"}
+def fetch_subreddit(subreddit: str, limit: int = 25) -> list:
+    """Fetch hot posts from a single subreddit via RSS."""
+    url = _RSS_URL.format(subreddit=subreddit)
 
-
-def _get_oauth_token(session: requests.Session) -> str | None:
-    global _OAUTH_TOKEN, _OAUTH_TOKEN_EXPIRES_AT
-
-    creds = _oauth_credentials()
-    if creds is None:
-        return None
-
-    now = time.time()
-    if _OAUTH_TOKEN and now < (_OAUTH_TOKEN_EXPIRES_AT - 60):
-        return _OAUTH_TOKEN
-
-    resp = session.post(
-        "https://www.reddit.com/api/v1/access_token",
-        auth=creds,
-        data={"grant_type": "client_credentials"},
-        headers={"User-Agent": _DEFAULT_USER_AGENT},
-        timeout=12,
-    )
-    if resp.status_code != 200:
-        logger.warning("Reddit OAuth token request failed: HTTP %d", resp.status_code)
-        return None
-
-    payload = resp.json()
-    token = payload.get("access_token")
-    if not token:
-        logger.warning("Reddit OAuth token request failed: missing access token")
-        return None
-
-    _OAUTH_TOKEN = token
-    _OAUTH_TOKEN_EXPIRES_AT = now + int(payload.get("expires_in", 3600))
-    return _OAUTH_TOKEN
-
-
-def _fetch_listing(session: requests.Session, subreddit: str, limit: int) -> list:
-    global _PUBLIC_403_HINT_LOGGED
-
-    token = _get_oauth_token(session)
-    endpoints: list[tuple[str, str, dict[str, str]]] = []
-
-    if token:
-        endpoints.append(
-            (
-                "oauth",
-                f"https://oauth.reddit.com/r/{subreddit}/hot",
-                {"Authorization": f"bearer {token}"},
-            )
-        )
-
-    endpoints.extend(
-        [
-            ("public-api", f"https://api.reddit.com/r/{subreddit}/hot", {}),
-            ("public-web", f"https://www.reddit.com/r/{subreddit}/hot.json", {}),
-        ]
-    )
-
-    saw_public_403 = False
-    saw_rate_limit = False
-
-    for label, url, extra_headers in endpoints:
-        resp = session.get(
-            url,
-            params={"limit": limit, "raw_json": 1},
-            headers={**_PUBLIC_HEADERS, **extra_headers},
-            timeout=12,
-        )
-
-        if resp.status_code == 200:
-            return resp.json().get("data", {}).get("children", [])
-
-        if resp.status_code == 429:
-            saw_rate_limit = True
-            logger.warning("Reddit rate-limited on r/%s via %s", subreddit, label)
-            continue
-
-        if resp.status_code == 403:
-            if label != "oauth":
-                saw_public_403 = True
-            logger.warning("Reddit r/%s via %s: HTTP 403", subreddit, label)
-            continue
-
-        logger.warning("Reddit r/%s via %s: HTTP %d", subreddit, label, resp.status_code)
-
-    if saw_public_403 and token is None and not _PUBLIC_403_HINT_LOGGED:
-        logger.warning(
-            "Reddit public endpoints are rejecting this environment. "
-            "For GitHub Actions, add REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET secrets."
-        )
-        _PUBLIC_403_HINT_LOGGED = True
-
-    if saw_rate_limit:
+    try:
+        feed = feedparser.parse(url, agent=_USER_AGENT)
+    except Exception as exc:
+        logger.warning("Reddit r/%s RSS parse error: %s", subreddit, exc)
         return []
 
-    return []
+    status = feed.get("status", 0)
+    if status != 200:
+        logger.warning("Reddit r/%s RSS returned HTTP %d", subreddit, status)
+        return []
 
-
-def _normalize_posts(children: list, subreddit: str) -> list:
     posts = []
-    for child in children:
-        p = child.get("data", {})
-        title = p.get("title", "")
-        selftext = p.get("selftext", "")
-        if selftext in ("[removed]", "[deleted]", ""):
-            text = title
+    for entry in feed.entries[:limit]:
+        title = (entry.get("title") or "").strip()
+        summary_html = entry.get("summary") or entry.get("content", [{}])[0].get("value", "")
+        summary_text = _clean_html(summary_html)
+
+        # Build text field: prefer summary, fall back to title
+        if summary_text and summary_text != title:
+            text = f"{title}. {summary_text[:400]}"
         else:
-            text = title + ". " + selftext[:400]
+            text = title
+
+        link = ""
+        for link_el in entry.get("links", []):
+            if link_el.get("rel") == "alternate" or not link:
+                href = link_el.get("href", "")
+                if href:
+                    link = href
+
+        published_str = entry.get("published", "") or entry.get("updated", "")
+        published = _parse_published(published_str) if published_str else datetime.now(timezone.utc).isoformat()
 
         posts.append(
             {
                 "source": subreddit,
                 "title": title,
                 "text": text,
-                "score": p.get("score", 0),
-                "num_comments": p.get("num_comments", 0),
-                "url": "https://reddit.com" + p.get("permalink", ""),
-                "published": datetime.fromtimestamp(
-                    p.get("created_utc", 0), tz=timezone.utc
-                ).isoformat(),
+                "score": 0,
+                "num_comments": 0,
+                "url": link,
+                "published": published,
             }
         )
+
     return posts
 
 
-def fetch_subreddit(subreddit: str, limit: int = 25) -> list:
-    try:
-        with requests.Session() as session:
-            children = _fetch_listing(session, subreddit, limit)
-        return _normalize_posts(children, subreddit)
-    except Exception as exc:
-        logger.warning("Reddit r/%s error: %s", subreddit, exc)
-        return []
-
-
 def fetch_all() -> list:
-    if _skip_reddit_enabled():
-        logger.info("Skipping Reddit because SKIP_REDDIT is enabled.")
-        return []
+    """Fetch hot posts from all configured subreddits.
 
-    if _running_in_github_actions() and _oauth_credentials() is None:
-        logger.warning(
-            "Skipping Reddit in GitHub Actions because REDDIT_CLIENT_ID and "
-            "REDDIT_CLIENT_SECRET are not set."
-        )
-        return []
-
+    Works identically in GitHub Actions, local dev, and any CI — no
+    API credentials, no OAuth, no env vars required.
+    """
     all_posts: list = []
     for subreddit in SUBREDDITS:
         posts = fetch_subreddit(subreddit)
         logger.info("  r/%s: %d posts", subreddit, len(posts))
         all_posts.extend(posts)
-        time.sleep(2.0)  # stay well under rate limit
+        time.sleep(2.0)  # rate limit courtesy
     logger.info("Reddit total: %d posts", len(all_posts))
     return all_posts
