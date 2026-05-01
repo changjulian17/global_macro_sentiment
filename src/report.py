@@ -338,6 +338,7 @@ def generate_report(
     news_posts:    list,
     summary:  dict,
     history:  list,
+    spy_returns: dict | None = None,
 ) -> Path:
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -365,6 +366,17 @@ def generate_report(
     hist_rd      = [round(h.get("reddit_score",  0) or 0, 4) for h in history]
     hist_nw      = [round(h.get("news_score",    0) or 0, 4) for h in history]
 
+    # SPY daily returns aligned to run timestamps
+    spy_returns = spy_returns or {}
+    hist_spy_rets = []
+    for run_time in hist_run_times:
+        if run_time and len(run_time) >= 10:
+            run_date = run_time[:10]
+            ret = spy_returns.get(run_date)
+            hist_spy_rets.append(ret if ret is not None else None)
+        else:
+            hist_spy_rets.append(None)
+
     liq_hist = (liquidity or {}).get("history", {})
     liq_labels = liq_hist.get("dates", [])
     liq_scores = liq_hist.get("scores", [])
@@ -378,6 +390,16 @@ def generate_report(
     else:
         _y_min = -0.5
         _y_max = 0.5
+
+    # Determine SPY y-axis range if we have data
+    _spy_vals = [v for v in hist_spy_rets if v is not None]
+    if _spy_vals:
+        _max_abs = max(abs(v) for v in _spy_vals) * 1.15 or 2.0
+        _spy_y_min = -_max_abs
+        _spy_y_max = _max_abs
+    else:
+        _spy_y_min = -2.0
+        _spy_y_max = 2.0
 
     # Build indicators HTML section
     indicators_html = ""
@@ -635,6 +657,25 @@ def generate_report(
           label: 'News',
           data: {json.dumps(hist_nw)},
           borderColor: '#d29922', fill: false, tension: 0.35, pointRadius: 2
+        }},
+        {{
+          label: 'SPY Daily Return %',
+          data: {json.dumps(hist_spy_rets)},
+          type: 'bar',
+          yAxisID: 'y2',
+          backgroundColor: function(ctx) {{
+            const v = ctx.parsed && ctx.parsed.y;
+            if (v === null || v === undefined) return 'transparent';
+            return v >= 0 ? 'rgba(63, 185, 80, 0.25)' : 'rgba(248, 81, 73, 0.25)';
+          }},
+          borderColor: function(ctx) {{
+            const v = ctx.parsed && ctx.parsed.y;
+            if (v === null || v === undefined) return 'transparent';
+            return v >= 0 ? 'rgba(63, 185, 80, 0.50)' : 'rgba(248, 81, 73, 0.50)';
+          }},
+          borderWidth: 1,
+          borderRadius: 2,
+          barPercentage: 0.6
         }}
       ]
     }},
@@ -668,6 +709,14 @@ def generate_report(
           ticks: {{ color: '#8b949e', maxTicksLimit: 8, font: {{ size: 11 }} }},
           grid:  {{ color: '#21262d' }},
           title: {{ display: true, text: 'Sentiment Score', color: '#8b949e', font: {{ size: 11 }} }}
+        }},
+        y2: {{
+          position: 'right',
+          min: {_spy_y_min},
+          max: {_spy_y_max},
+          ticks: {{ color: '#8b949e', maxTicksLimit: 8, font: {{ size: 11 }} }},
+          grid:  {{ drawOnChartArea: false }},
+          title: {{ display: true, text: 'SPY Daily Return %', color: '#8b949e', font: {{ size: 11 }} }}
         }}
       }}
     }}

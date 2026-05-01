@@ -19,6 +19,7 @@ import json
 import logging
 import sys
 import webbrowser
+from datetime import datetime, timezone
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -243,7 +244,38 @@ Examples
     logger.info("Saved run #%d to database.", run_id)
 
     # ------------------------------------------------------------------
-    # 6. Generate report
+    # 6. SPY daily returns for chart overlay
+    # ------------------------------------------------------------------
+    spy_returns: dict = {}
+    if history:
+        try:
+            import yfinance as yf
+            import pandas as pd
+            start_dt = datetime.fromisoformat(history[0]["run_time"])
+            end_dt = datetime.now(timezone.utc)
+            spy = yf.download("SPY", start=start_dt, end=end_dt, progress=False, auto_adjust=True)
+            if not spy.empty and len(spy) > 1:
+                # Handle multi-level columns (yfinance >= 0.2.38)
+                close_col = spy.columns.get_level_values(0).tolist().index("Close") \
+                    if isinstance(spy.columns, pd.MultiIndex) else None
+                if close_col is not None:
+                    close = spy.iloc[:, close_col]
+                else:
+                    close = spy["Close"] if "Close" in spy.columns else spy["Adj Close"]
+                daily_ret = close.pct_change() * 100
+                spy_returns = {
+                    str(idx.date()): round(float(v), 2)
+                    for idx, v in zip(daily_ret.index, daily_ret)
+                    if pd.notna(v)
+                }
+                logger.info("SPY returns: %d days loaded", len(spy_returns))
+            else:
+                logger.warning("SPY download returned empty data")
+        except Exception as exc:
+            logger.warning("Could not fetch SPY returns: %s", exc)
+
+    # ------------------------------------------------------------------
+    # 7. Generate report
     # ------------------------------------------------------------------
     from src.report import generate_report
 
@@ -258,6 +290,7 @@ Examples
         news_posts    = nw_posts,
         summary       = summary,
         history       = history,
+        spy_returns   = spy_returns,
     )
 
     logger.info("Done!  Report → %s", report_path)
