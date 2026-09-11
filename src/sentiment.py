@@ -10,9 +10,39 @@ Score range: -1.0 (very bearish) → 0.0 (neutral) → +1.0 (very bullish).
 from __future__ import annotations
 
 import logging
+import math
+from datetime import datetime, timezone
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Recency weighting — newer items count more than older ones.
+# ---------------------------------------------------------------------------
+# Weight halves every RECENCY_HALF_LIFE_DAYS days of age (exponential decay).
+RECENCY_HALF_LIFE_DAYS = 7.0
+_DECAY_LAMBDA = math.log(2) / RECENCY_HALF_LIFE_DAYS
+
+
+def _recency_weight(published: str, now: Optional[datetime] = None) -> float:
+    """Exponential-decay weight for an item based on its `published` timestamp.
+
+    weight = 0.5 ** (age_days / RECENCY_HALF_LIFE_DAYS)
+
+    Items with a missing/unparseable timestamp get full weight (1.0) rather
+    than being dropped, so older data without dates isn't silently zeroed.
+    """
+    if not published:
+        return 1.0
+    try:
+        ts = datetime.fromisoformat(str(published).replace("Z", "+00:00"))
+    except (ValueError, TypeError):
+        return 1.0
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=timezone.utc)
+    now = now or datetime.now(timezone.utc)
+    age_days = max(0.0, (now - ts).total_seconds() / 86400)
+    return math.exp(-_DECAY_LAMBDA * age_days)
 
 # ---------------------------------------------------------------------------
 # Financial sentiment word lists that augment VADER's general-purpose lexicon
@@ -139,7 +169,12 @@ def analyze_batch(items: list, use_finbert: bool = False) -> list:
 
 
 def aggregate_sentiment(items: list) -> dict:
-    """Compute summary statistics from a list of scored items."""
+    """Compute summary statistics from a list of scored items.
+
+    Each item is weighted by recency (exponential decay, see
+    `_recency_weight`) so fresher news moves the mean and bull/bear split
+    more than stale news, instead of every item counting equally.
+    """
     if not items:
         return {
             "mean": 0.0,
@@ -148,13 +183,23 @@ def aggregate_sentiment(items: list) -> dict:
             "bearish_pct": 0.0,
             "count": 0,
         }
+    now = datetime.now(timezone.utc)
+    weights = [_recency_weight(i.get("published", ""), now) for i in items]
     scores = [i.get("score", 0.0) for i in items]
     labels = [i.get("label", "neutral") for i in items]
     n = len(items)
+    total_weight = sum(weights) or 1.0
+
+    def _weighted_pct(label: str) -> float:
+        w = sum(wt for wt, lbl in zip(weights, labels) if lbl == label)
+        return round(w / total_weight * 100, 1)
+
+    weighted_mean = sum(s * w for s, w in zip(scores, weights)) / total_weight
+
     return {
-        "mean":        round(sum(scores) / n, 4),
-        "bullish_pct": round(labels.count("bullish") / n * 100, 1),
-        "neutral_pct": round(labels.count("neutral") / n * 100, 1),
-        "bearish_pct": round(labels.count("bearish") / n * 100, 1),
+        "mean":        round(weighted_mean, 4),
+        "bullish_pct": _weighted_pct("bullish"),
+        "neutral_pct": _weighted_pct("neutral"),
+        "bearish_pct": _weighted_pct("bearish"),
         "count":       n,
     }
